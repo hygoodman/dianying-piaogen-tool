@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -u
+
+repo_root="$(git rev-parse --show-toplevel)"
+log_file="$repo_root/.git/auto-sync.log"
+
+"$repo_root/scripts/sync-to-github.sh" >>"$log_file" 2>&1 || true
