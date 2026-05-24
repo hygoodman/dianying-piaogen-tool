@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 520" role="img" aria-label="迷雾之城 poster">
+  <defs>
+    <linearGradient id="night" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#152631"/>
+      <stop offset=".5" stop-color="#071017"/>
+      <stop offset="1" stop-color="#020304"/>
+    </linearGradient>
+  </defs>
+  <rect width="360" height="520" fill="url(#night)"/>
+  <path d="M18 118 h72 v280 H18z M110 84 h58 v316h-58z M214 102 h74v300h-74z M300 144h42v270h-42z" fill="#0a0c0f"/>
+  <path d="M0 276 C84 230 180 226 360 256 L360 520 L0 520 Z" fill="#050608"/>
+  <path d="M178 220 h35 l17 188 h-70 z" fill="#060607"/>
+  <circle cx="196" cy="192" r="22" fill="#11151b"/>
+  <path d="M0 340 L360 250" stroke="#c33b2a" stroke-width="6" opacity=".72"/>
+  <path d="M360 350 L0 264" stroke="#c33b2a" stroke-width="4" opacity=".55"/>
+  <text x="180" y="82" text-anchor="middle" fill="#d4c3a2" font-family="serif" font-size="22" letter-spacing="7">CITY OF FOG</text>
+  <text x="180" y="456" text-anchor="middle" fill="#f1e2ce" font-family="serif" font-size="38">迷雾之城</text>
+</svg>

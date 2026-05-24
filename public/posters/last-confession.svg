@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 520" role="img" aria-label="最后的告白 poster">
+  <defs>
+    <linearGradient id="rose" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#e7a19a"/>
+      <stop offset=".55" stop-color="#93606b"/>
+      <stop offset="1" stop-color="#25151b"/>
+    </linearGradient>
+  </defs>
+  <rect width="360" height="520" fill="url(#rose)"/>
+  <circle cx="180" cy="170" r="72" fill="#f0c2b7" opacity=".24"/>
+  <path d="M114 176 C132 112 214 105 244 168 C218 166 206 182 198 224 C166 222 134 210 114 176Z" fill="#29151c"/>
+  <path d="M142 210 C178 198 216 216 242 276 C270 340 260 412 236 520 H76 C88 410 96 284 142 210Z" fill="#43222e"/>
+  <path d="M0 392 C94 348 226 346 360 382 L360 520 L0 520Z" fill="#14090e" opacity=".32"/>
+  <text x="180" y="72" text-anchor="middle" fill="#41262b" font-family="serif" font-size="18" letter-spacing="6">THE LAST CONFESSION</text>
+  <text x="180" y="452" text-anchor="middle" fill="#fff1e6" font-family="serif" font-size="38">最后的告白</text>
+</svg>

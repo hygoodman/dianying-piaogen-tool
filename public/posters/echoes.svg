@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 520" role="img" aria-label="深海回声 poster">
+  <defs>
+    <linearGradient id="sea" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#07263c"/>
+      <stop offset=".52" stop-color="#063f62"/>
+      <stop offset="1" stop-color="#02070b"/>
+    </linearGradient>
+  </defs>
+  <rect width="360" height="520" fill="url(#sea)"/>
+  <circle cx="184" cy="90" r="58" fill="#a8ebff" opacity=".16"/>
+  <path d="M42 56 C104 148 106 230 64 344" fill="none" stroke="#8de9ff" stroke-opacity=".2" stroke-width="9"/>
+  <path d="M290 46 C232 158 262 222 308 312" fill="none" stroke="#8de9ff" stroke-opacity=".18" stroke-width="6"/>
+  <path d="M0 384 C62 330 122 364 180 338 C242 310 300 318 360 278 L360 520 L0 520 Z" fill="#021017" opacity=".9"/>
+  <path d="M174 334 h28 l8 92 h-45 z" fill="#050708"/>
+  <circle cx="188" cy="316" r="18" fill="#0b1118"/>
+  <text x="180" y="106" text-anchor="middle" fill="#d4c3a2" font-family="serif" font-size="32" letter-spacing="10">ECHOES</text>
+  <text x="180" y="448" text-anchor="middle" fill="#f2e6d5" font-family="serif" font-size="38">深海回声</text>
+  <text x="180" y="482" text-anchor="middle" fill="#b8a079" font-family="serif" font-size="14" letter-spacing="5">OF THE ABYSS</text>
+</svg>

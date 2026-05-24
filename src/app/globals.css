@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --app-max: 430px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: #050403;
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  background:
+    radial-gradient(circle at 80% 8%, rgba(122, 36, 23, 0.24), transparent 28rem),
+    radial-gradient(circle at 10% 38%, rgba(211, 154, 71, 0.12), transparent 22rem),
+    #050403;
+  color: #f2e5d2;
+  font-family: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.42;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px),
+    radial-gradient(circle at 30% 20%, rgba(224, 154, 76, 0.08), transparent 22rem);
+  background-size: 5px 5px, 7px 7px, 100% 100%;
+  mix-blend-mode: screen;
+}
+
+.phone-shell {
+  width: min(100%, var(--app-max));
+  min-height: 100vh;
+  margin: 0 auto;
+  position: relative;
+  overflow-x: hidden;
+  background:
+    linear-gradient(180deg, rgba(21, 18, 15, 0.92), rgba(5, 5, 4, 0.96)),
+    radial-gradient(circle at 82% 18%, rgba(118, 55, 32, 0.25), transparent 18rem);
+}
+
+.page-pad {
+  padding: 28px 24px 108px;
+}
+
+.soft-card {
+  border: 1px solid rgba(224, 191, 139, 0.12);
+  background: linear-gradient(145deg, rgba(39, 34, 29, 0.92), rgba(20, 18, 16, 0.9));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.ticket-edge {
+  clip-path: polygon(
+    0 7%, 3% 7%, 3% 0, 97% 0, 97% 7%, 100% 7%,
+    100% 93%, 97% 93%, 97% 100%, 3% 100%, 3% 93%, 0 93%
+  );
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.field-input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.82);
+  text-align: right;
+  text-overflow: ellipsis;
+  outline: none;
+}
+
+.field-input::-webkit-calendar-picker-indicator {
+  filter: invert(1) sepia(1) saturate(0.5);
+  opacity: 0.75;
+}

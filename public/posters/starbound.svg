@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 520" role="img" aria-label="星际归途 poster">
+  <defs>
+    <radialGradient id="g" cx="50%" cy="18%" r="70%">
+      <stop offset="0" stop-color="#d7f4ff"/>
+      <stop offset=".26" stop-color="#24627b"/>
+      <stop offset=".66" stop-color="#071523"/>
+      <stop offset="1" stop-color="#02060a"/>
+    </radialGradient>
+    <linearGradient id="beam" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#fff7cf"/>
+      <stop offset=".55" stop-color="#50c8ff" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#50c8ff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="360" height="520" fill="url(#g)"/>
+  <path d="M180 20 L195 300 L165 300 Z" fill="url(#beam)" opacity=".88"/>
+  <circle cx="180" cy="126" r="58" fill="none" stroke="#bdefff" stroke-opacity=".35" stroke-width="2"/>
+  <path d="M0 410 C70 330 103 330 156 412 C210 325 268 322 360 392 L360 520 L0 520 Z" fill="#07101a"/>
+  <path d="M154 350 h52 l14 112 h-80 z" fill="#050607"/>
+  <circle cx="180" cy="326" r="24" fill="#101720"/>
+  <text x="180" y="82" text-anchor="middle" fill="#d7c39c" font-family="serif" font-size="40" letter-spacing="8">STAR</text>
+  <text x="180" y="126" text-anchor="middle" fill="#d7c39c" font-family="serif" font-size="34" letter-spacing="6">BOUND</text>
+  <text x="180" y="466" text-anchor="middle" fill="#f2e6d5" font-family="serif" font-size="38">星际归途</text>
+  <text x="180" y="492" text-anchor="middle" fill="#b9a27e" font-family="serif" font-size="14" letter-spacing="4">FILM STUB</text>
+</svg>
