@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, Suspense, useState } from "react";
-import { LockKeyhole, LogIn, Mail, UserPlus, UserRound } from "lucide-react";
+import { Eye, EyeOff, LockKeyhole, LogIn, Mail, UserPlus, UserRound } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
@@ -32,6 +32,7 @@ function LoginContent() {
   const next = searchParams.get("next") ?? "/me";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
@@ -139,13 +140,21 @@ function LoginContent() {
         <label className="soft-card flex h-16 items-center gap-4 rounded-xl px-5 text-white/70">
           <LockKeyhole className="h-7 w-7 text-gold" strokeWidth={1.5} />
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             placeholder={mode === "login" ? "输入密码" : "设置密码，至少 6 位"}
             className="min-w-0 flex-1 bg-transparent text-lg text-white outline-none placeholder:text-white/35"
             autoComplete={mode === "login" ? "current-password" : "new-password"}
           />
+          <button
+            type="button"
+            aria-label={showPassword ? "隐藏密码" : "显示密码"}
+            onClick={() => setShowPassword((current) => !current)}
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-white/55 transition hover:bg-white/5 hover:text-gold"
+          >
+            {showPassword ? <EyeOff className="h-6 w-6" strokeWidth={1.6} /> : <Eye className="h-6 w-6" strokeWidth={1.6} />}
+          </button>
         </label>
 
         {error ? <p className="rounded-xl bg-ember/15 px-4 py-3 text-sm text-red-100">{error}</p> : null}
