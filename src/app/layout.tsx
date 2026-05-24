@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { LocalTicketMigration } from "@/components/LocalTicketMigration";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function RootLayout({
     <html lang="zh-CN">
       <body className="app-grain">
         <main className="phone-shell">{children}</main>
+        <LocalTicketMigration />
       </body>
     </html>
   );

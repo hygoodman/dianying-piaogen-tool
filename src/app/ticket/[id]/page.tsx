@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { Download, Share2, ShoppingBag } from "lucide-react";
 import { toPng } from "html-to-image";
@@ -8,19 +8,42 @@ import { AppShell } from "@/components/AppShell";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { TicketPreview } from "@/components/TicketPreview";
-import { movies } from "@/data/movies";
-import { getTemplateById } from "@/lib/movie";
-import { useTickets } from "@/lib/storage";
+import { fetchMovieById, fetchTemplateById } from "@/lib/catalog";
+import { getTicket } from "@/lib/storage";
+import type { Movie, Ticket, TicketTemplate } from "@/types";
 
 export default function TicketDetailPage() {
   const params = useParams<{ id: string }>();
-  const tickets = useTickets();
   const [message, setMessage] = useState("");
+  const [ticket, setTicket] = useState<Ticket | undefined>();
+  const [movie, setMovie] = useState<Movie | undefined>();
+  const [template, setTemplate] = useState<TicketTemplate | undefined>();
+  const [loading, setLoading] = useState(true);
   const exportRef = useRef<HTMLDivElement>(null);
 
-  const ticket = useMemo(() => tickets.find((item) => item.id === params.id), [params.id, tickets]);
-  const movie = useMemo(() => (ticket ? movies.find((item) => item.id === ticket.movieId) : undefined), [ticket]);
-  const template = ticket ? getTemplateById(ticket.templateId) : undefined;
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadTicket() {
+      const nextTicket = await getTicket(params.id);
+      const [nextMovie, nextTemplate] = nextTicket
+        ? await Promise.all([fetchMovieById(nextTicket.movieId), fetchTemplateById(nextTicket.templateId)])
+        : [undefined, undefined];
+
+      if (!cancelled) {
+        setTicket(nextTicket);
+        setMovie(nextMovie);
+        setTemplate(nextTemplate);
+        setLoading(false);
+      }
+    }
+
+    void loadTicket();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [params.id]);
 
   async function saveImage() {
     if (!exportRef.current || !ticket) {
@@ -50,6 +73,15 @@ export default function TicketDetailPage() {
     }
     await navigator.clipboard.writeText(window.location.href);
     setMessage("分享链接已复制。");
+  }
+
+  if (loading) {
+    return (
+      <AppShell>
+        <PageHeader title="票根详情" showBack showMenu />
+        <EmptyState title="正在读取票根" description="正在从云端读取票根详情。" />
+      </AppShell>
+    );
   }
 
   if (!ticket || !movie || !template) {

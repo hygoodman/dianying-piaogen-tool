@@ -1,17 +1,23 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { clsx } from "clsx";
 import { AppShell } from "@/components/AppShell";
 import { EmptyState } from "@/components/EmptyState";
 import { MovieCard } from "@/components/MovieCard";
 import { PageHeader } from "@/components/PageHeader";
 import { SearchBar } from "@/components/SearchBar";
-import { categories, movies } from "@/data/movies";
+import { categories, fetchMovies } from "@/lib/catalog";
+import type { Movie } from "@/types";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState(categories[0]);
+  const [movies, setMovies] = useState<Movie[]>([]);
+
+  useEffect(() => {
+    void fetchMovies().then(setMovies);
+  }, []);
 
   const filteredMovies = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -20,7 +26,7 @@ export default function SearchPage() {
       const haystack = `${movie.title} ${movie.originalTitle} ${movie.director} ${movie.releaseYear}`.toLowerCase();
       return matchCategory && (!normalized || haystack.includes(normalized));
     });
-  }, [category, query]);
+  }, [category, movies, query]);
 
   return (
     <AppShell>
@@ -34,7 +40,7 @@ export default function SearchPage() {
             type="button"
             onClick={() => setCategory(item)}
             className={clsx(
-              "h-12 min-w-20 rounded-full px-7 text-lg transition",
+              "h-11 min-w-[5.5rem] whitespace-nowrap rounded-full px-6 text-base font-medium leading-none transition",
               category === item
                 ? "border border-red-500 bg-ember text-parchment"
                 : "border border-white/5 bg-white/[0.07] text-white/55"

@@ -1,8 +1,8 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Armchair, Building2, CalendarDays, Clock, FileText, MapPin, Star } from "lucide-react";
+import { Armchair, Building2, CalendarDays, Clock, FileText, MapPin, Share2, Star } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { EmptyState } from "@/components/EmptyState";
 import { MoviePoster } from "@/components/MoviePoster";
@@ -10,18 +10,22 @@ import { PageHeader } from "@/components/PageHeader";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { RatingInput } from "@/components/RatingInput";
 import { TemplateSelector } from "@/components/TemplateSelector";
-import { movies } from "@/data/movies";
-import { ticketTemplates } from "@/data/templates";
+import { fetchMovieById, fetchTemplates } from "@/lib/catalog";
 import { createTicket } from "@/lib/storage";
 import { formatGenres } from "@/lib/movie";
-import type { TicketFormInput } from "@/types";
+import { hasSupabaseConfig } from "@/lib/supabase/env";
+import { useAuthUser } from "@/lib/auth";
+import type { Movie, TicketFormInput, TicketTemplate } from "@/types";
 
 const today = new Date().toISOString().slice(0, 10);
 
 export default function CreateTicketPage() {
   const router = useRouter();
   const params = useParams<{ movieId: string }>();
-  const movie = useMemo(() => movies.find((item) => item.id === params.movieId), [params.movieId]);
+  const { user, loading: authLoading } = useAuthUser();
+  const [movie, setMovie] = useState<Movie | undefined>();
+  const [templates, setTemplates] = useState<TicketTemplate[]>([]);
+  const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
     watchDate: today,
     watchTime: "19:30",
@@ -30,10 +34,52 @@ export default function CreateTicketPage() {
     seat: "7排12座",
     userRating: 4,
     reviewText: "视觉震撼，故事动人，值得二刷！",
-    templateId: ticketTemplates[0].id,
+    templateId: "classic",
     isPublic: false
   });
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadData() {
+      const [nextMovie, nextTemplates] = await Promise.all([
+        fetchMovieById(params.movieId),
+        fetchTemplates()
+      ]);
+      if (!cancelled) {
+        setMovie(nextMovie);
+        setTemplates(nextTemplates);
+        setForm((current) => ({ ...current, templateId: nextTemplates[0]?.id ?? "classic" }));
+        setLoading(false);
+      }
+    }
+
+    void loadData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [params.movieId]);
+
+  if (loading || authLoading) {
+    return (
+      <AppShell>
+        <PageHeader title="创建票根" showBack />
+        <EmptyState title="正在准备票根" description="正在读取电影和模板信息。" />
+      </AppShell>
+    );
+  }
+
+  if (hasSupabaseConfig() && !user) {
+    return (
+      <AppShell>
+        <PageHeader title="创建票根" showBack />
+        <EmptyState title="请先登录" description="登录后才能把票根保存到你的云端收藏。" actionHref={`/login?next=/create/${params.movieId}`} actionLabel="去登录" />
+      </AppShell>
+    );
+  }
 
   if (!movie) {
     return (
@@ -48,8 +94,9 @@ export default function CreateTicketPage() {
     setForm((current) => ({ ...current, [key]: value }));
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError("");
     if (!movie) {
       setError("电影信息不存在，请重新选择。");
       return;
@@ -59,11 +106,17 @@ export default function CreateTicketPage() {
       return;
     }
 
-    const ticket = createTicket({
-      movieId: movie.id,
-      ...form
-    } satisfies TicketFormInput);
-    router.push(`/ticket/${ticket.id}`);
+    try {
+      setSubmitting(true);
+      const ticket = await createTicket({
+        movieId: movie.id,
+        ...form
+      } satisfies TicketFormInput);
+      router.push(`/ticket/${ticket.id}`);
+    } catch (ticketError) {
+      setError(ticketError instanceof Error ? ticketError.message : "票根生成失败，请稍后重试。");
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -102,6 +155,18 @@ export default function CreateTicketPage() {
           <Field icon={<Star />} label="评分">
             <RatingInput value={form.userRating} onChange={(value) => update("userRating", value)} />
           </Field>
+          <Field icon={<Share2 />} label="公开">
+            <button
+              type="button"
+              onClick={() => update("isPublic", !form.isPublic)}
+              className={`ml-auto flex h-9 w-16 items-center rounded-full border px-1 transition ${
+                form.isPublic ? "justify-end border-gold bg-gold/25" : "justify-start border-white/15 bg-white/10"
+              }`}
+              aria-pressed={form.isPublic}
+            >
+              <span className="h-6 w-6 rounded-full bg-parchment" />
+            </button>
+          </Field>
           <div className="border-b-0 py-5">
             <div className="mb-4 flex items-center gap-4 text-xl text-white/72">
               <FileText className="h-7 w-7" strokeWidth={1.4} />
@@ -118,11 +183,18 @@ export default function CreateTicketPage() {
           </div>
         </section>
 
-        <TemplateSelector selectedId={form.templateId} movie={movie} onChange={(templateId) => update("templateId", templateId)} />
+        <TemplateSelector
+          selectedId={form.templateId}
+          movie={movie}
+          templates={templates}
+          onChange={(templateId) => update("templateId", templateId)}
+        />
 
         {error ? <p className="rounded-xl bg-ember/15 px-4 py-3 text-sm text-red-100">{error}</p> : null}
 
-        <PrimaryButton type="submit" className="mt-3">生成票根</PrimaryButton>
+        <PrimaryButton type="submit" disabled={submitting} className="mt-3">
+          {submitting ? "生成中" : "生成票根"}
+        </PrimaryButton>
       </form>
     </AppShell>
   );

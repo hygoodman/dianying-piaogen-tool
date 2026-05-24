@@ -2,22 +2,22 @@
 
 import { Check } from "lucide-react";
 import { clsx } from "clsx";
-import { ticketTemplates } from "@/data/templates";
 import type { Movie, TicketTemplate } from "@/types";
 import { MoviePoster } from "./MoviePoster";
 
 type TemplateSelectorProps = {
   selectedId: string;
   movie: Movie;
+  templates: TicketTemplate[];
   onChange: (templateId: string) => void;
 };
 
-export function TemplateSelector({ selectedId, movie, onChange }: TemplateSelectorProps) {
+export function TemplateSelector({ selectedId, movie, templates, onChange }: TemplateSelectorProps) {
   return (
     <section className="soft-card rounded-2xl p-4">
       <h2 className="mb-4 text-xl font-medium text-parchment">选择票根模板</h2>
       <div className="grid grid-cols-3 gap-3">
-        {ticketTemplates.map((template) => (
+        {templates.map((template) => (
           <button
             key={template.id}
             type="button"

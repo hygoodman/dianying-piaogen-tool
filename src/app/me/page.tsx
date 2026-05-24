@@ -1,21 +1,37 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { ListFilter, Search } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ListFilter, LogOut, Search } from "lucide-react";
 import { clsx } from "clsx";
 import { AppShell } from "@/components/AppShell";
 import { BottomNav } from "@/components/BottomNav";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { TicketCard } from "@/components/TicketCard";
-import { getMovieById, getTemplateById } from "@/lib/movie";
+import { fetchMovies, fetchTemplates } from "@/lib/catalog";
 import { useTickets } from "@/lib/storage";
+import { signOut, useAuthUser } from "@/lib/auth";
+import { hasSupabaseConfig } from "@/lib/supabase/env";
+import type { Movie, TicketTemplate } from "@/types";
 
 const filters = ["全部", "本月", "高分"] as const;
 
 export default function MyCollectionPage() {
-  const tickets = useTickets();
+  const { user, loading: authLoading } = useAuthUser();
+  const { tickets, loading: ticketsLoading, error, refresh } = useTickets();
   const [filter, setFilter] = useState<(typeof filters)[number]>("全部");
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [templates, setTemplates] = useState<TicketTemplate[]>([]);
+
+  useEffect(() => {
+    void Promise.all([fetchMovies(), fetchTemplates()]).then(([nextMovies, nextTemplates]) => {
+      setMovies(nextMovies);
+      setTemplates(nextTemplates);
+    });
+  }, []);
+
+  const moviesById = useMemo(() => new Map(movies.map((movie) => [movie.id, movie])), [movies]);
+  const templatesById = useMemo(() => new Map(templates.map((template) => [template.id, template])), [templates]);
 
   const filteredTickets = useMemo(() => {
     const currentMonth = new Date().toISOString().slice(0, 7);
@@ -30,6 +46,23 @@ export default function MyCollectionPage() {
     });
   }, [filter, tickets]);
 
+  async function handleSignOut() {
+    await signOut();
+    await refresh();
+  }
+
+  if (hasSupabaseConfig() && !authLoading && !user) {
+    return (
+      <>
+        <AppShell>
+          <PageHeader brand showMenu />
+          <EmptyState title="请先登录" description="登录后查看同步到云端的电影票根收藏。" actionHref="/login?next=/me" actionLabel="去登录" />
+        </AppShell>
+        <BottomNav />
+      </>
+    );
+  }
+
   return (
     <>
       <AppShell>
@@ -37,11 +70,20 @@ export default function MyCollectionPage() {
         <section className="-mt-2 mb-8 flex items-end justify-between">
           <div>
             <h1 className="font-display text-5xl font-bold text-parchment">我的收藏</h1>
-            <p className="mt-4 text-lg text-white/55">已收藏 {tickets.length} 张票根</p>
+            <p className="mt-4 text-lg text-white/55">
+              {ticketsLoading ? "正在读取收藏" : `已收藏 ${tickets.length} 张票根`}
+            </p>
           </div>
-          <button type="button" aria-label="搜索收藏" className="grid h-14 w-14 place-items-center text-white">
-            <Search className="h-9 w-9" strokeWidth={1.5} />
-          </button>
+          <div className="flex items-center gap-2">
+            {user ? (
+              <button type="button" aria-label="退出登录" onClick={handleSignOut} className="grid h-14 w-14 place-items-center text-white/80">
+                <LogOut className="h-8 w-8" strokeWidth={1.5} />
+              </button>
+            ) : null}
+            <button type="button" aria-label="搜索收藏" className="grid h-14 w-14 place-items-center text-white">
+              <Search className="h-9 w-9" strokeWidth={1.5} />
+            </button>
+          </div>
         </section>
 
         <div className="mb-7 flex items-center justify-between">
@@ -65,6 +107,8 @@ export default function MyCollectionPage() {
           </button>
         </div>
 
+        {error ? <p className="mb-5 rounded-xl bg-ember/15 px-4 py-3 text-sm text-red-100">{error}</p> : null}
+
         {filteredTickets.length === 0 ? (
           <EmptyState
             title={tickets.length === 0 ? "还没有票根" : "没有符合条件的票根"}
@@ -75,8 +119,9 @@ export default function MyCollectionPage() {
         ) : (
           <div className="space-y-5">
             {filteredTickets.map((ticket) => {
-              const movie = getMovieById(ticket.movieId);
-              if (!movie) {
+              const movie = moviesById.get(ticket.movieId);
+              const template = templatesById.get(ticket.templateId) ?? templates[0];
+              if (!movie || !template) {
                 return null;
               }
               return (
@@ -84,7 +129,7 @@ export default function MyCollectionPage() {
                   key={ticket.id}
                   ticket={ticket}
                   movie={movie}
-                  template={getTemplateById(ticket.templateId)}
+                  template={template}
                 />
               );
             })}

@@ -40,7 +40,7 @@ export function PageHeader({
         ) : brand ? (
           <div>
             <div className="font-display text-4xl font-bold leading-none tracking-normal text-parchment">
-              Film Stub
+              影迹票根
             </div>
             <div className="mt-3 text-sm tracking-[0.45em] text-gold">电影票根收藏工具</div>
           </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronRight, Flame, Ticket } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
@@ -7,11 +8,17 @@ import { BottomNav } from "@/components/BottomNav";
 import { MovieCard } from "@/components/MovieCard";
 import { PageHeader } from "@/components/PageHeader";
 import { PrimaryButton } from "@/components/PrimaryButton";
-import { featuredMovies } from "@/data/movies";
+import { fetchMovies, getFeaturedMovies } from "@/lib/catalog";
 import { useTickets } from "@/lib/storage";
+import type { Movie } from "@/types";
 
 export default function HomePage() {
-  const ticketCount = useTickets().length;
+  const { tickets } = useTickets();
+  const [movies, setMovies] = useState<Movie[]>([]);
+
+  useEffect(() => {
+    void fetchMovies().then((items) => setMovies(getFeaturedMovies(items)));
+  }, []);
 
   return (
     <>
@@ -45,7 +52,7 @@ export default function HomePage() {
             <Ticket className="h-9 w-9 shrink-0 text-parchment" />
             <div className="min-w-0 flex-1">
               <div className="text-xl font-medium text-parchment">我的收藏</div>
-              <div className="mt-1 truncate text-base text-white/50">已收藏 {ticketCount} 张票根</div>
+              <div className="mt-1 truncate text-base text-white/50">已收藏 {tickets.length} 张票根</div>
             </div>
             <ChevronRight className="h-7 w-7 text-parchment/70" />
           </Link>
@@ -60,7 +67,7 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="scrollbar-none -mx-2 flex gap-4 overflow-x-auto px-2 pb-2">
-            {featuredMovies.map((movie, index) => (
+            {movies.map((movie, index) => (
               <MovieCard key={movie.id} movie={movie} compact priority={index === 0} />
             ))}
           </div>
