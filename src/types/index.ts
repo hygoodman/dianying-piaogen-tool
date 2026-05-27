@@ -4,12 +4,15 @@ export type Movie = {
   originalTitle: string;
   posterUrl: string;
   releaseYear: number;
+  releaseDate: string;
   genre: string[];
   country: string;
   director: string;
   description: string;
   rating: number;
-  duration: number;
+  duration: number | null;
+  sourceUrl: string;
+  isCatalogVisible: boolean;
 };
 
 export type TicketTemplateStyle = "classic" | "black-gold" | "vintage";

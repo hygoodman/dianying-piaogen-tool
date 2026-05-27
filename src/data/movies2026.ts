@@ -1,31 +1,9 @@
-insert into public.movies (
-  id, title, original_title, poster_url, release_year, release_date, genre, country, director, description,
-  rating, duration, source_url, is_catalog_visible
-) values
-  ('starbound', '星际归途', 'Starbound', '/posters/starbound.svg', 2024, '2024-01-01', array['科幻', '冒险'], '中国', '林诺', '一支深空返航小队穿越失联星门，在陌生星海中寻找回家的坐标。', 9.1, 142, '', false),
-  ('echoes', '深海回声', 'Echoes', '/posters/echoes.svg', 2024, '2024-01-01', array['剧情', '悬疑'], '中国', '陈默', '潜水员在海底遗址中听见十年前失踪者的求救声，真相随潮汐浮出水面。', 8.7, 136, '', false),
-  ('mist-city', '迷雾之城', 'Mist City', '/posters/mist-city.svg', 2024, '2024-01-01', array['悬疑', '犯罪'], '中国', '赵舟', '雨夜城市里连续出现的红光线索，将一名刑警带回未结旧案。', 8.3, 128, '', false),
-  ('last-confession', '最后的告白', 'The Last Confession', '/posters/last-confession.svg', 2024, '2024-01-01', array['爱情', '剧情'], '中国', '苏念', '一封迟到的信，把两段人生重新推到同一座城市的晨光里。', 8.0, 118, '', false),
-  ('moon-letter', '月球来信', 'Moon Letters', '/posters/moon-letter.svg', 2024, '2024-01-01', array['科幻', '爱情'], '中国', '沈一', '月面基地最后一名工程师，用无线电向地球发送没有收件人的情书。', 7.8, 125, '', false),
-  ('homebound-train', '归途列车', 'Homebound Train', '/posters/homebound-train.svg', 2023, '2023-01-01', array['剧情', '家庭'], '中国', '周南', '一趟跨年列车上，几位陌生人把没说出口的告别讲给了彼此。', 7.6, 109, '', false)
-on conflict (id) do update set
-  title = excluded.title,
-  original_title = excluded.original_title,
-  poster_url = excluded.poster_url,
-  release_year = excluded.release_year,
-  release_date = excluded.release_date,
-  genre = excluded.genre,
-  country = excluded.country,
-  director = excluded.director,
-  description = excluded.description,
-  rating = excluded.rating,
-  duration = excluded.duration,
-  source_url = excluded.source_url,
-  is_catalog_visible = excluded.is_catalog_visible;
+import type { Movie } from "@/types";
 
-with raw_movies(line, ord) as (
-  select line, ord
-  from regexp_split_to_table($movies_2026$
+const SOURCE_URL =
+  "https://zh.wikipedia.org/wiki/2026%E5%B9%B4%E4%B8%AD%E5%9C%8B%E5%A4%A7%E9%99%B8%E9%9B%BB%E5%BD%B1%E4%BD%9C%E5%93%81%E5%88%97%E8%A1%A8";
+
+const rawMovies2026 = `
 2026-01-01	过家家	Whispers of Gratitude	李太言	成龙、彭昱畅、张佳宁、潘斌龙	https://upload.wikimedia.org/wikipedia/zh/3/3a/Unexpected_Family.png
 2026-01-01	一路福星	Lucky All the Way	贾凯	句号、舒耀瑄、李嘉明
 2026-01-06	月光里的男孩	Dog Tashi	达杰丁增	久美江措、更旦、尕玛久美
@@ -109,84 +87,72 @@ with raw_movies(line, ord) as (
 2026-05-22	今晚正好	Crossing A Dawn	赵八斗	马思纯、陈昊森、张艺凡、宋洋、温茉言、吕星辰
 2026-05-22	突破3000米的日月潭		安景鸿	李罗、李紫嫣、范逸臣、言承旭
 2026-05-23	森中有林	All The Good Eyes	郑执	于和伟、高圆圆、韩庚、张天爱、乔杉、夏之光、宋小宝、谢可寅	https://upload.wikimedia.org/wikipedia/zh/4/42/%E6%A3%AE%E4%B8%AD%E6%9C%89%E6%9E%97%E6%B5%B7%E6%8A%A5.png
-$movies_2026$, E'\n') with ordinality as rows(line, ord)
-),
-parsed_movies as (
-  select
-    ord,
-    string_to_array(line, E'\t') as fields
-  from raw_movies
-  where line <> ''
-),
-normalized_movies as (
-  select
-    'cn-2026-' || lpad(ord::text, 3, '0') as id,
-    fields[1]::date as release_date,
-    fields[2] as title,
-    coalesce(fields[3], '') as original_title,
-    fields[4] as director,
-    fields[5] as cast_text,
-    coalesce(fields[6], '') as poster_url
-  from parsed_movies
-)
-insert into public.movies (
-  id, title, original_title, poster_url, release_year, release_date, genre, country, director, description,
-  rating, duration, source_url, is_catalog_visible
-)
-select
-  id,
-  title,
-  original_title,
-  poster_url,
-  2026,
-  release_date,
-  case
-    when cast_text = '动画片' then array['动画']
-    when cast_text = '纪录片' then array['纪录']
-    when title ~ '警察|警|爆炸|搜查|寒战|消失|夜王|惊魂|半夜|哀牢山|天才游戏|改邪归正|东北警察' then array['悬疑', '犯罪']
-    when title ~ '拳手|镖人|勇者|敢死队|无疆|神功|八府巡按' then array['动作']
-    when title ~ '太空|星河|异种|登月|宇宙' or original_title ~ 'Time|Moon|Space|Astra' then array['科幻']
-    when title ~ '情书|喜欢|遇见|爱情|浪漫|爱人|男人和一个女人' or original_title ~ 'Love|Romance|Woman' then array['爱情', '剧情']
-    when title ~ '福星|上班|马腾|解决专家|没问题|六六大顺|飞驰|拼桌|我的妈耶|许可' or original_title ~ 'Comedy|OK' then array['喜剧', '剧情']
-    when title ~ '1938|参军|曹雪芹' then array['历史', '剧情']
-    else array['剧情']
-  end,
-  '中国',
-  director,
-  case
-    when cast_text = '动画片' then '《' || title || '》是 2026 年中国大陆院线公映动画电影，来源于年度国产电影上映片单。'
-    when cast_text = '纪录片' then '《' || title || '》是 2026 年中国大陆院线公映纪录电影，来源于年度国产电影上映片单。'
-    else '《' || title || '》是 2026 年中国大陆院线公映电影，由' || director || '执导，' || cast_text || '主演。'
-  end,
-  0,
-  null,
-  'https://zh.wikipedia.org/wiki/2026%E5%B9%B4%E4%B8%AD%E5%9C%8B%E5%A4%A7%E9%99%B8%E9%9B%BB%E5%BD%B1%E4%BD%9C%E5%93%81%E5%88%97%E8%A1%A8',
-  true
-from normalized_movies
-on conflict (id) do update set
-  title = excluded.title,
-  original_title = excluded.original_title,
-  poster_url = excluded.poster_url,
-  release_year = excluded.release_year,
-  release_date = excluded.release_date,
-  genre = excluded.genre,
-  country = excluded.country,
-  director = excluded.director,
-  description = excluded.description,
-  rating = excluded.rating,
-  duration = excluded.duration,
-  source_url = excluded.source_url,
-  is_catalog_visible = excluded.is_catalog_visible;
+`.trim();
 
-insert into public.ticket_templates (
-  id, name, style_key, preview_url, background_style, accent_color
-) values
-  ('classic', '经典电影票', 'classic', '', 'linear-gradient(135deg, #ead4ad, #d2aa72)', '#b98431'),
-  ('black-gold', '黑金纪念版', 'black-gold', '', 'linear-gradient(135deg, #101010, #2d2418)', '#d7a34d'),
-  ('vintage', '复古纸质票', 'vintage', '', 'linear-gradient(135deg, #c89a74, #e2bd95)', '#8b5536')
-on conflict (id) do update set
-  name = excluded.name,
-  style_key = excluded.style_key,
-  preview_url = excluded.preview_url,
-  background_style = excluded.background_style,
-  accent_color = excluded.accent_color;
+export const movies2026: Movie[] = rawMovies2026
+  .split("\n")
+  .map((line, index) => {
+    const [releaseDate, title, originalTitle, director, cast, posterUrl = ""] = line.split("\t");
+    const genre = inferGenres(title, originalTitle, cast);
+
+    return {
+      id: `cn-2026-${String(index + 1).padStart(3, "0")}`,
+      title,
+      originalTitle,
+      posterUrl,
+      releaseYear: 2026,
+      releaseDate,
+      genre,
+      country: "中国",
+      director,
+      description: createDescription(title, director, cast, genre),
+      rating: 0,
+      duration: null,
+      sourceUrl: SOURCE_URL,
+      isCatalogVisible: true
+    };
+  })
+  .sort((a, b) => b.releaseDate.localeCompare(a.releaseDate));
+
+function inferGenres(title: string, originalTitle: string, cast: string) {
+  if (cast === "动画片") {
+    return ["动画"];
+  }
+  if (cast === "纪录片") {
+    return ["纪录"];
+  }
+
+  const text = `${title} ${originalTitle}`;
+  if (/警察|警|爆炸|搜查|寒战|消失|夜王|惊魂|半夜|哀牢山|天才游戏|改邪归正|东北警察/.test(text)) {
+    return ["悬疑", "犯罪"];
+  }
+  if (/拳手|镖人|勇者|敢死队|无疆|神功|八府巡按/.test(text)) {
+    return ["动作"];
+  }
+  if (/太空|星河|异种|登月|宇宙|Time|Moon|Space|Astra/.test(text)) {
+    return ["科幻"];
+  }
+  if (/情书|喜欢|遇见|爱情|浪漫|爱人|男人和一个女人|Be Yourself|Love|Romance|Woman/.test(text)) {
+    return ["爱情", "剧情"];
+  }
+  if (/福星|上班|马腾|解决专家|没问题|六六大顺|飞驰|拼桌|我的妈耶|许可|Comedy|OK/.test(text)) {
+    return ["喜剧", "剧情"];
+  }
+  if (/1938|参军|曹雪芹/.test(text)) {
+    return ["历史", "剧情"];
+  }
+
+  return ["剧情"];
+}
+
+function createDescription(title: string, director: string, cast: string, genre: string[]) {
+  if (cast === "动画片") {
+    return `《${title}》是 2026 年中国大陆院线公映动画电影，来源于年度国产电影上映片单。`;
+  }
+  if (cast === "纪录片") {
+    return `《${title}》是 2026 年中国大陆院线公映纪录电影，来源于年度国产电影上映片单。`;
+  }
+
+  const castText = cast ? `，${cast}主演` : "";
+  return `《${title}》是 2026 年中国大陆院线公映${genre.join("/")}电影，由${director || "待补"}执导${castText}。`;
+}

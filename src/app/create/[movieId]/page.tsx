@@ -131,7 +131,7 @@ export default function CreateTicketPage() {
             {movie.releaseYear} · {formatGenres(movie.genre)}
           </p>
           <p className="mt-3 text-lg text-white/65">导演：{movie.director}</p>
-          <p className="mt-3 text-lg text-white/65">片长：{movie.duration} 分钟</p>
+          <p className="mt-3 text-lg text-white/65">片长：{movie.duration ? `${movie.duration} 分钟` : "待补"}</p>
         </div>
       </section>
 

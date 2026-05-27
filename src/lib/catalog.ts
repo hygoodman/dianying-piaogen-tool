@@ -7,22 +7,23 @@ import { hasSupabaseConfig } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/client";
 import { movieFromRow, templateFromRow } from "@/lib/supabase/mappers";
 
-export const categories = ["热门", "科幻", "剧情", "爱情", "悬疑"];
+export const categories = ["热门", "动画", "喜剧", "剧情", "动作", "犯罪", "科幻", "爱情", "纪录", "悬疑"];
 
 export async function fetchMovies(): Promise<Movie[]> {
   if (!hasSupabaseConfig()) {
-    return fallbackMovies;
+    return fallbackMovies.filter((movie) => movie.isCatalogVisible);
   }
 
   const supabase = createClient();
   const { data, error } = await supabase
     .from("movies")
     .select("*")
-    .order("release_year", { ascending: false })
+    .eq("is_catalog_visible", true)
+    .order("release_date", { ascending: false })
     .order("rating", { ascending: false });
 
   if (error || !data?.length) {
-    return fallbackMovies;
+    return fallbackMovies.filter((movie) => movie.isCatalogVisible);
   }
 
   return data.map(movieFromRow);
@@ -74,5 +75,5 @@ export async function fetchTemplateById(templateId: string): Promise<TicketTempl
 }
 
 export function getFeaturedMovies(movies: Movie[]) {
-  return movies.slice(0, 4);
+  return movies.filter((movie) => movie.isCatalogVisible).slice(0, 4);
 }

@@ -11,6 +11,8 @@ type MovieCardProps = {
 };
 
 export function MovieCard({ movie, compact, priority }: MovieCardProps) {
+  const ratingLabel = movie.rating > 0 ? movie.rating.toFixed(1) : "待评";
+
   if (compact) {
     return (
       <Link href={`/create/${movie.id}`} className="block w-[5.5rem] shrink-0">
@@ -18,7 +20,7 @@ export function MovieCard({ movie, compact, priority }: MovieCardProps) {
         <div className="mt-3 truncate text-base text-parchment">{movie.title}</div>
         <div className="mt-1 flex items-center gap-1 text-gold">
           <Star className="h-4 w-4 fill-gold" />
-          <span className="text-sm">{movie.rating.toFixed(1)}</span>
+          <span className="text-sm">{ratingLabel}</span>
         </div>
       </Link>
     );
@@ -35,7 +37,7 @@ export function MovieCard({ movie, compact, priority }: MovieCardProps) {
         <p className="mt-2 truncate text-base text-gold">导演：{movie.director}</p>
         <div className="mt-2 flex items-center gap-2 text-gold">
           <Star className="h-5 w-5 fill-gold" />
-          <span>{movie.rating.toFixed(1)}</span>
+          <span>{ratingLabel}</span>
         </div>
       </div>
       <Link

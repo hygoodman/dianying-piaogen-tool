@@ -13,12 +13,15 @@ export function movieFromRow(row: MovieRow): Movie {
     originalTitle: row.original_title,
     posterUrl: row.poster_url,
     releaseYear: row.release_year,
+    releaseDate: row.release_date,
     genre: row.genre,
     country: row.country,
     director: row.director,
     description: row.description,
     rating: Number(row.rating),
-    duration: row.duration
+    duration: row.duration,
+    sourceUrl: row.source_url,
+    isCatalogVisible: row.is_catalog_visible
   };
 }
 
