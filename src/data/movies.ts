@@ -1,5 +1,5 @@
 import type { Movie } from "@/types";
-import { movies2026 } from "./movies2026";
+import { catalogMovies } from "./movieCatalog";
 
 const legacyMovies: Movie[] = [
   {
@@ -100,7 +100,7 @@ const legacyMovies: Movie[] = [
   }
 ];
 
-export const movies: Movie[] = [...movies2026, ...legacyMovies];
+export const movies: Movie[] = [...catalogMovies, ...legacyMovies];
 
 export const featuredMovies = movies.filter((movie) => movie.isCatalogVisible).slice(0, 4);
 
